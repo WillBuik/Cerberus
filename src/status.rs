@@ -1,5 +1,6 @@
 use std::{fmt::Display, collections::HashMap, sync::Arc, convert::Infallible, net::SocketAddr};
 
+use chrono::{DateTime, Utc, Local};
 use tokio::sync::{RwLock, Mutex};
 use warp::Filter;
 
@@ -20,7 +21,7 @@ pub enum StatusLevel {
 
 struct StatusEntry {
     message: String,
-    timestamp: u64,
+    timestamp: DateTime<Utc>,
     level: StatusLevel
 }
 
@@ -73,7 +74,7 @@ impl StatusManager {
     pub async fn update_status<T: ToString + Display> (&self, device_id: DeviceId, message: T, level: StatusLevel) {
         let status_entry = StatusEntry {
             message: message.to_string(),
-            timestamp: 0,
+            timestamp: Utc::now(),
             level,
         };
 
@@ -170,7 +171,8 @@ impl StatusManager {
             status_text.push_str(&format!("{}\n", device_name));
             if let Some(statuses) = status_data.statuses.get(device_id) {
                 for status_entry in statuses {
-                    status_text.push_str(&format!("  [{:?}] {}\n", status_entry.level, status_entry.message));
+                    let ts = status_entry.timestamp.with_timezone(&Local).format("%Y-%m-%d %H:%M:%S");
+                    status_text.push_str(&format!("  [{}, {:?}] {}\n", ts, status_entry.level, status_entry.message));
                 }
             } else {
                 status_text.push_str("    No status entries.\n");
