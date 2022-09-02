@@ -116,7 +116,7 @@ impl NotificationManager {
 }
 
 /// Send a notification to a target.
-async fn send_notification(target: &NotificationTarget, message: &str) -> anyhow::Result<()> {
+pub async fn send_notification(target: &NotificationTarget, message: &str) -> anyhow::Result<()> {
     match target {
         NotificationTarget::DiscordWebhook { url, username } => {
             let mut params = HashMap::new();

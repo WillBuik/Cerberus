@@ -153,7 +153,20 @@ async fn main() {
         Err(err) => {
             log::error!("Unable to parse configuration file: {}", err);
 
-            // Todo: attempt to parse notification targets from file to send startup failure notice.
+            // Attempt to parse notification targets from file to send startup failure notice.
+            let notification_fallbacks = load_configruation_notification_targets();
+            match notification_fallbacks {
+                Ok(notification_fallbacks) => {
+                    log::info!("Parsed {} notification target fallbacks", notification_fallbacks.len());
+                    for target in notification_fallbacks {
+                        match notification::send_notification(&target, &format!("Startup failed! Unable to parse configuration file: {}", err)).await {
+                            Ok(_) => log::info!("Startup failure notification sent sucessfully"),
+                            Err(err) => log::error!("Unable to send startup failure notification: {}", err),
+                        }
+                    }
+                },
+                Err(err) => log::error!("Unable to parse any notification fallback targets: {}", err),
+            }
 
             std::process::exit(-1);
         },
