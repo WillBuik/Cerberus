@@ -5,12 +5,14 @@ use async_trait::async_trait;
 use lazy_static::lazy_static;
 use serde::{Serialize, Deserialize};
 
+use crate::napcogemini::NapcoGeminiDeviceMonitor;
 use crate::notification::{NotificationTarget, NotificationManager};
 use crate::dummydevice::DummyDeviceMonitor;
 use crate::status::{StatusManager, StatusLevel};
 
 mod backgroundtask;
 mod dummydevice;
+mod napcogemini;
 mod notification;
 mod status;
 
@@ -97,8 +99,8 @@ fn create_device_monitor(device_config: &DeviceType, status_manger: &StatusManag
         DeviceType::Dummy { states, period } => {
             Ok(Box::new(DummyDeviceMonitor::new(status_manger.clone(), states.clone(), *period)?))
         },
-        DeviceType::NapcoGemini { port: _ } => {
-            anyhow::bail!("Napco Gemini device monitor not implmented");
+        DeviceType::NapcoGemini { port } => {
+            Ok(Box::new(NapcoGeminiDeviceMonitor::new(status_manger.clone(), port.clone())?))
         },
     }
 }
