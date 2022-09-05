@@ -159,7 +159,7 @@ impl NapcoSerialInterface {
     /// single area system. Beyond that, use at your own risk.
     pub fn decode_keypad_message(message: &[u8]) -> Option<(String, i8, String)> {
         if message.len() == 27 && message[4] == 0x01 {
-            //println!("Bytes recv {:02X?} ({})", message, message.len());
+            //log::info!("Bytes recv {:02X?} ({})", message, message.len());
 
             let line = if message[5] == 0x20 {
                 0
@@ -169,7 +169,7 @@ impl NapcoSerialInterface {
                 -1
             };
 
-            if line > 0 {
+            if line >= 0 {
                 let keypad_status = Self::keypad_status(message[8], message[9]);
                 let keypad_text = String::from_utf8_lossy(&message[10..26]).to_string();
                 return Some((keypad_status, line, keypad_text));
