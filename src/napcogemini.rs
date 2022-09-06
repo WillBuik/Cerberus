@@ -225,6 +225,9 @@ impl NapcoGeminiDeviceMonitor {
                             }
                         }
                     }
+
+                    // This entire task is sync until it sends a status update, let the executor tick.
+                    tokio::task::yield_now().await;
                 }
 
                 status_manger.update_status(id, "Napco Gemini device monitor stopped.", StatusLevel::Info).await;
