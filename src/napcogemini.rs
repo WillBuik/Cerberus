@@ -214,7 +214,12 @@ impl NapcoGeminiDeviceMonitor {
                                     let keypad_entire_text = format!("{} {}", last_line.trim(), keypad_text.trim()).trim().to_string();
                                     let keypad_message = format!("{} \"{}\"", keypad_status, keypad_entire_text);
                                     if keypad_message != last_keypad_message {
-                                        status_manger.update_status(id, &keypad_message, StatusLevel::Status).await;
+                                        let level = if keypad_message.to_lowercase().contains("alarm") {
+                                            StatusLevel::Alarm
+                                        } else {
+                                            StatusLevel::Status
+                                        };
+                                        status_manger.update_status(id, &keypad_message, level).await;
                                         last_keypad_message = keypad_message;
                                     }
                                 } else {
